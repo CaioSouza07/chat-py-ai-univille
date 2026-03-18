@@ -6,10 +6,6 @@ from langchain.prompts import ChatPromptTemplate
 # Atenção Turma: Está é a chave (api_key) do professor e ela será descontínuada após a aula.
 # Cada aluno deve considerar em criar uma conta e uma chave. Na aula vou demonstrar quais passo seguir para criar a conta e a chave.
 
-api_key = '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'
-os.environ['GROQ_API_KEY'] = api_key
-
-chat = ChatGroq(model='llama-3.3-70b-versatile')
 
 def resposta_bot(mensagens):
   mensagens_modelo = [('system', 'Você é um treinador de futebol da Univille AI ')]
