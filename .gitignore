@@ -1,4 +1,5 @@
 .env
-venv/
+venv/*
+
 teste.py
 chat_asa.py
