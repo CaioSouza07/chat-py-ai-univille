@@ -3,37 +3,6 @@ import sqlite3
 def get_connection():
     return sqlite3.connect('chat_database.db')
 
-def criar_tabela_conversas():
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS conversas (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            titulo TEXT
-        )
-    ''')
-
-    conn.commit()
-    conn.close()
-
-def criar_tabela_mensagens():
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS mensagens (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            message TEXT,
-            role TEXT,
-            data_hora TEXT,
-            id_conversa INTEGER
-        )
-    ''')
-
-    conn.commit()
-    conn.close()
-
 def criar_conversa(titulo):
     conn = get_connection()
     cursor = conn.cursor()
