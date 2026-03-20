@@ -1,48 +1,85 @@
-# importar as bibliotecas
-
 import streamlit as st
-import os
-from langchain_core.prompts import ChatPromptTemplate
+from database import *
+from chat import Chat
+from datetime import datetime
+
+if "id_conversa" not in st.session_state:
+    st.session_state.id_conversa = None
+
+if "chat" not in st.session_state:
+    st.session_state.chat = Chat()
 
 
 
 st.set_page_config(
-    page_title="ChatPyAI",
+    page_title="ChatPY",
     layout="centered"
 )
 
-# Criar o meu Titulo
-st.title("ChatPyAI")
-
+st.title("ChatPY")
 
 with st.sidebar:
+    st.title("Menu")
 
-    st.markdown("##  Configurações")
-    st.markdown("---")
+    if st.button("➕ Nova conversa", type="primary"):
+        st.session_state.id_conversa = None
+        st.session_state.chat.messages = []
+        st.rerun()
 
-    groq_key = st.text_input(
-        "Groq API Key",
-        type="password",
-        placeholder="API_...",
-        help="Crie sua chave em console.groq.com/keys"
-    )
+    conversas = obter_conversas()
 
-# Gera a separação entre as interfaces
+    # st.divider()
+    st.subheader("Seus chats")
+
+    for conversa in reversed(conversas):
+        if st.button(conversa[1]):
+            st.session_state.id_conversa = conversa[0]
+            mensagens = obter_mensagens_conversa(conversa[0])
+
+            st.session_state.chat.messages = [
+                msg for msg in mensagens
+            ]
+            st.rerun()
 
 st.markdown("---")
 
-contexto = st.text_area(
-        "Contexto do Assistente",
-        value="Você é um assistente acadêmico da Univille especialista em Inteligência Artificial. "
-              "Explique conceitos de forma clara, didática e em português.",
-        height=150
-    )
+for role, msg in st.session_state.chat.messages:
+    if role == "user":
+        st.chat_message("user").write(msg)
+    else:
+        st.chat_message("assistant").write(msg)
 
-modelo = st.selectbox(
-        "Modelo Groq",
-        [
-            "llama-3.3-70b-versatile",
-            "llama3-8b-8192",
-            "mixtral-8x7b-32768"
-        ]
-    )
+prompt = st.chat_input("Digite sua pergunta...")
+
+if prompt:
+    if st.session_state.id_conversa is None:
+        titulo = st.session_state.chat.sugestao_titulo(prompt)
+        st.session_state.id_conversa = criar_conversa(titulo)
+
+    resposta = st.session_state.chat.resposta_bot(prompt)
+    agora = datetime.now()
+    formatado = agora.strftime("%d/%m/%Y %H:%M:%S")
+
+    resposta_user = {
+        "message": prompt,
+        "role": "user",
+        "data_hora": formatado,
+        "id_conversa": st.session_state.id_conversa
+    }
+
+    resposta_chat = {
+        "message": resposta,
+        "role": "assistant",
+        "data_hora": formatado,
+        "id_conversa": st.session_state.id_conversa
+    }
+
+    inserir_mensagem(resposta_user)
+    inserir_mensagem(resposta_chat)
+
+    # st.session_state.chat.messages.append(("user", prompt))
+    # st.session_state.chat.messages.append(("assistant", resposta))
+
+    prompt = False
+
+    st.rerun()
